@@ -40,8 +40,6 @@ public class StudentManagementApplication {
   public String greeting(){
     return "こんにちは、Webのプログラム開発の世界にようこそ！";
   }
-
-
    */
 
   private String name;
