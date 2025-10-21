@@ -25,8 +25,14 @@ dependencies {
     //Apache Commons Lang  https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
     implementation 'org.apache.commons:commons-lang3:3.14.0'
 
+    // MySQLドライバー
+    runtimeOnly 'com.mysql:mysql-connector-j'
 
-	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+    //MyBatis
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.5'
+
+
+    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
