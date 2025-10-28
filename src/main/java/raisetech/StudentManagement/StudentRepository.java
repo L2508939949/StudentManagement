@@ -11,6 +11,14 @@ import org.apache.tomcat.util.http.fileupload.util.LimitedInputStream;
 @Mapper
 public interface StudentRepository {
 
+  @Select("SELECT * FROM students")
+  List<Student> search(String name);
+
+  @Select("SELECT * FROM students_courses")
+  List<Course> searchCourse(String course);
+
+
+  /*
   @Select("SELECT * FROM student WHERE name= #{name}")
   Student searchByName(String name);
 
@@ -25,4 +33,6 @@ public interface StudentRepository {
 
   @Select("SELECT * FROM student")
   List<Student> StudentList();
+
+   */
 }
