@@ -18,11 +18,11 @@ public class StudentConverter {
       StudentDetail studentDetail = new StudentDetail();
       studentDetail.setStudent(student);
 
-      List<StudentsCourses> conbertStudentCourses = studentsCourses.stream()
+      List<StudentsCourses> convertStudentCourses = studentsCourses.stream()
           .filter(studentsCourse -> student.getStudentID().equals(studentsCourse.getStudentID()))
           .collect(Collectors.toList());
 
-      studentDetail.setStudentsCourse(conbertStudentCourses);
+      studentDetail.setStudentsCourse(convertStudentCourses);
       studentDetails.add(studentDetail);
     });
     return studentDetails;
