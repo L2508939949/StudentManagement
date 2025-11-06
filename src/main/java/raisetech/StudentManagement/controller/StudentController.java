@@ -20,6 +20,7 @@ public class StudentController {
 
   @GetMapping("/studentList")
   public List<Student> getStudentList(){
+   // List<Student> temp = service.searchStudentList();
     return service.searchStudentList();
   }
 
