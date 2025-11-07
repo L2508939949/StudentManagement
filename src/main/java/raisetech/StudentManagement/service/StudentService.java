@@ -25,11 +25,9 @@ public class StudentService {
   }
   public List<StudentsCourses> searchStudentsCourseList(){
 
-    //絞り込み検索で「JAVAコース」のコース情報のみを抽出する。
-    //抽出したリストをコントローラーに返す。
     return repository.searchStudentsCourse()
         .stream().filter(course -> course.getCourseName() != null &&
-            course.getCourseName().toLowerCase().contains("javaコース"))
+            course.getCourseName().toLowerCase().contains("java"))
         .collect(Collectors.toList());
   }
 
