@@ -106,9 +106,5 @@ public class StudentManagementApplication {
       return name + "さんは登録されていません。";
     }
   }
-
-   */
-
-
 }
 
