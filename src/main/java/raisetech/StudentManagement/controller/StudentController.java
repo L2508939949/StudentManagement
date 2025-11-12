@@ -14,13 +14,10 @@ public class StudentController {
   private StudentService service;
 
   @Autowired
-  public StudentController(StudentService service) {
     this.service = service;
   }
 
   @GetMapping("/studentList")
-  public List<Student> getStudentList(){
-    return service.searchStudentList();
   }
 
   @GetMapping("/studentsCourseList")
