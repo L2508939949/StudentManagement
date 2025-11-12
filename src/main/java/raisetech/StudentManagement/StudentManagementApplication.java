@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-
 @SpringBootApplication
 @RestController
 public class StudentManagementApplication {
@@ -24,13 +23,39 @@ public class StudentManagementApplication {
   public static void main(String[] args) {
     SpringApplication.run(StudentManagementApplication.class, args);
   }
+  @GetMapping("/studentList")
+  public List<Student> getStudentList(String name){
+    return repository.search(name);
+  }
+
+  @GetMapping("/courseList")
+  public List<Course> getCourseList(String course){
+    return repository.searchCourse(course);
+  }
+
+
+
+
+
+
+
+
+
+
+
+  /*
+
+  public static void main(String[] args) {
+    SpringApplication.run(StudentManagementApplication.class, args);
+  }
   /*
    @GetMapping("/student")
   public String getStudent(@RequestParam String name){
     Student student = repository.searchByName(name);
     return student.getName() + " " + student.getAge() + "歳";
   }
-   */
+   //
+
   @GetMapping("/student")
   public String getAllStudent(){
     List<Student> studentList = repository.StudentList();
@@ -58,7 +83,7 @@ public class StudentManagementApplication {
   public void deleteStudent(String name){
     repository.deleteStudent(name);
   }
-
+  */
 
   /*
   @GetMapping("/hello")
