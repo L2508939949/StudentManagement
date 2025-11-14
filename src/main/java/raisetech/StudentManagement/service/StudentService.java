@@ -26,8 +26,5 @@ public class StudentService {
 
   public  void  registerStudentWthCourse(Student student, StudentsCourses course){
     repository.insert(student);
-
-    course.setStudentID(student.getStudentID());
-    repository.insertStudentCourse(course);
   }
 }

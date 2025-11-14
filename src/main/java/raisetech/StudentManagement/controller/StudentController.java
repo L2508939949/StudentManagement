@@ -42,23 +42,4 @@ public class StudentController {
   public List<StudentsCourses> getStudentsCourseList(){
     return service.searchStudentsCourseList();
   }
-
-  @GetMapping("/newStudent")
-  public String newStudent(Model model) {
-    model.addAttribute("studentDetail", new StudentDetail());
-    return "registerStudent";
-  }
-
-  @PostMapping("/registerStudent")
-  public  String registerStudent(@ModelAttribute StudentDetail studentDetail, BindingResult result) {
-    if(result.hasErrors()) {
-      return "registerStudent";
-    }
-    service.registerStudentWthCourse
-        (studentDetail.getStudent(),
-            studentDetail.getCourse());
-
-    System.out.println(studentDetail.getStudent().getName()+ "さんが新規受講生として登録されました。");
-    return "redirect:/studentList";
-  }
 }
