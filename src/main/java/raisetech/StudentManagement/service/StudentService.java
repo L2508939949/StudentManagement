@@ -21,4 +21,8 @@ public class StudentService {
   }
   public List<StudentsCourses> searchStudentsCourseList(){
   }
+
+  public  void  registerStudentWthCourse(Student student, StudentsCourses course){
+    repository.insert(student);
+  }
 }
