@@ -28,6 +28,11 @@ public interface StudentRepository {
   List<StudentsCourses> searchStudentsCourse();
 
   @Insert("INSERT INTO students (student_id, name, kana_name, nickname, email, area, age, gender, remark, isDeleted)"+
-          "VALUES(#{studentID}, #{name}, #{kanaName}, #{nickName}, #{email}, #{area}, #{age}, #{gender}, #{remark}, #{isDeleted})")
+          "VALUES (#{studentID}, #{name}, #{kanaName}, #{nickName}, #{email}, #{area}, #{age}, #{gender}, #{remark}, #{isDeleted})")
   void insert(Student student);
+
+  @Insert("INSERT INTO students_courses (course_id, student_id, course_name, course_st_day, course_ed_day)"+
+      "VALUES (#{courseID}, #{studentID}, #{courseName}, #{courseStartday}, #{courseEndday})")
+  void insertStudentCourse(StudentsCourses course);
+
 }
