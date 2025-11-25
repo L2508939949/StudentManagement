@@ -2,6 +2,7 @@ package raisetech.StudentManagement.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import org.apache.ibatis.annotations.Update;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +25,31 @@ public class StudentService {
   }
   public List<StudentsCourses> searchStudentsCourseList(){
     return repository.searchStudentsCourse();
+  }
+
+  public  Student findStudent(String studentID){
+    return repository.findStudentByID(studentID);
+  }
+
+  public List<StudentsCourses> findCourses(String studentID) {
+    return repository.findCoursesByStudentID(studentID);
+  }
+
+  @Transactional
+  public void updateStudent(Student student) {
+    repository.updateStudent(student);
+  }
+
+  @Transactional
+  public void updateCourses(String studentID, String oldCourseID, StudentsCourses course) {
+    repository.updateStudentCourse(
+        studentID,
+        oldCourseID,
+        course.getCourseID(),
+        course.getCourseName(),
+        course.getCourseStartday(),
+        course.getCourseEndday()
+    );
   }
 
   @Transactional

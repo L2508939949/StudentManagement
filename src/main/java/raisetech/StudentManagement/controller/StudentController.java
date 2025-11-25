@@ -1,5 +1,7 @@
 package raisetech.StudentManagement.controller;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -10,6 +12,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import raisetech.StudentManagement.controller.converter.StudentConverter;
 import raisetech.StudentManagement.data.Student;
@@ -37,6 +40,50 @@ public class StudentController {
     model.addAttribute("studentList",converter.convertStudentDetails(students,studentsCourses));
     return "studentList";
   }
+
+  @GetMapping("/updateStudentForm")
+  public String  updateStudentForm(@RequestParam("studentID") String studentID,Model model){
+    Student student = service.findStudent(studentID);
+    List<StudentsCourses> courses = service.findCourses(studentID);
+
+    if (courses.isEmpty()) courses.add(new StudentsCourses());
+
+    StudentDetail detail = new StudentDetail();
+    detail.setStudent(student);
+    detail.setCourse(courses.get(0));
+    model.addAttribute("studentDetail", detail);
+    model.addAttribute("oldCourseID", courses.get(0).getCourseID());
+
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+    if (courses.get(0).getCourseStartday() != null) {
+      model.addAttribute("courseStartdayFormatted",
+          courses.get(0).getCourseStartday().format(formatter));
+    }
+    if (courses.get(0).getCourseEndday() != null) {
+      model.addAttribute("courseEnddayFormatted",
+          courses.get(0).getCourseEndday().format(formatter));
+    }
+    return "updateStudent";
+  }
+
+  @PostMapping("/updateStudent")
+  public String updateStudent(@ModelAttribute StudentDetail studentDetail,
+      @RequestParam("oldCourseID") String oldCourseID,
+      @RequestParam("courseStartday") String courseStartdayStr,
+      @RequestParam("courseEndday") String courseEnddayStr) {
+
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+    if (courseStartdayStr != null && !courseStartdayStr.isEmpty()) {
+      studentDetail.getCourse().setCourseStartday(LocalDateTime.parse(courseStartdayStr, formatter));
+    }
+    if (courseEnddayStr != null && !courseEnddayStr.isEmpty()) {
+      studentDetail.getCourse().setCourseEndday(LocalDateTime.parse(courseEnddayStr, formatter));
+    }
+    service.updateStudent(studentDetail.getStudent());
+    service.updateCourses(studentDetail.getStudent().getStudentID(), oldCourseID, studentDetail.getCourse());
+    return "redirect:/studentList";
+  }
+
 
   @GetMapping("/studentsCourseList")
   public List<StudentsCourses> getStudentsCourseList(){

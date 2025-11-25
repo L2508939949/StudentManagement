@@ -21,7 +21,11 @@
   </thead>
   <tbody>
   <tr th:each="studentDetail : ${studentList}">
-    <td th:text="${studentDetail.student.StudentID}">st00000001</td>
+    <td>
+      <a th:href="@{/updateStudentForm(studentID=${studentDetail.student.studentID})}">
+        <span th:text="${studentDetail.student.studentID}">st00000001</span>
+      </a>
+    </td>
     <td th:text="${studentDetail.student.name}">山田太郎</td>
     <td th:text="${studentDetail.student.kanaName}">ヤマダタロウ</td>
     <td th:text="${studentDetail.student.nickName}">ヤマダタロウ</td>
@@ -31,12 +35,7 @@
     <td th:text="${studentDetail.student.gender}">男性</td>
     <td th:text="${studentDetail.student.remark}">特になし</td>
 
-    <td>
-      <a th:href="@{/editStudentForm(studentID=${studentDetail.student.studentID})}">
-        <span th:text="${studentDetail.student.studentID}">st00000001</span>
-      </a>
 
-    </td>
   </tr>
   </tbody>
 </table>
