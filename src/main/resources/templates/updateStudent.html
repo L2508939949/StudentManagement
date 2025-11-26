@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>受講生登録</title>
+  <style>
+    form {
+       width: 400px;
+     }
+    textarea#remark {
+       width: 300px;
+       height: 80px;
+       margin-left: 55px;
+     }
+  </style>
+</head>
+<body>
+<h1>受講生更新</h1>
+<form th:action="@{/updateStudent}" th:object="${studentDetail}" method="post">
+  <input type="hidden" name="oldCourseID" th:value = "${oldCourseID}"/>
+  <fieldset>
+    <div>
+      <label>ID:</label>
+      <input type="text" th:field="*{student.studentID}" readonly /><br/>
+    </div>
+    <div>
+      <label>名前:</label>
+      <input type="text" th:field="*{student.name}" /><br/>
+    </div>
+    <div>
+      <label>カナ名:</label>
+      <input type="text" th:field="*{student.kanaName}" /><br/>
+    </div>
+
+    <div>
+      <label>ニックネーム:</label>
+      <input type="text" th:field="*{student.nickName}" /><br/>
+    </div>
+
+    <div>
+      <label>メール:</label>
+      <input type="text" th:field="*{student.email}" /><br/>
+    </div>
+
+    <div>
+      <label>地域:</label>
+      <input type="text" th:field="*{student.area}" /><br/>
+    </div>
+
+    <div>
+      <label>年齢:</label>
+      <input type="number" th:field="*{student.age}" /><br/>
+    </div>
+
+    <div>
+      <label>性別:</label>
+      <select th:field="*{student.gender}">
+        <option value="男">男</option>
+        <option value="女">女</option>
+      </select><br/>
+    </div>
+
+    <div>
+      <label>備考:</label>
+      <textarea th:field="*{student.remark}" rows="5" cols="40"></textarea><br/>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>コース情報（1件のみ）</legend>
+    <div>
+      <label>コースID:</label>
+      <input type="text" th:field="*{course.courseID}" /><br/>
+    </div>
+
+    <div>
+      <label>コース名:</label>
+      <input type="text" th:field="*{course.courseName}" /><br/>
+    </div>
+
+    <div>
+      <label>開始日:</label>
+      <input type="datetime-local"
+             th:value="${courseStartdayFormatted}"
+             name="courseStartday"/>
+
+    </div>
+
+    <label>終了日:</label>
+    <div>
+      <input type="datetime-local"
+             th:value="${courseEnddayFormatted}"
+             name="courseEndday"/>
+    </div>
+
+  </fieldset>
+  </div>
+   <button type="submit">更新</button>
+  </div>
+</form>
+</body>
+</html>
