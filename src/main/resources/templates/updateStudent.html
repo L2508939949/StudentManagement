@@ -63,6 +63,11 @@
       <label>備考:</label>
       <textarea th:field="*{student.remark}" rows="5" cols="40"></textarea><br/>
     </div>
+
+    <div>
+      <label>キャンセル:</label>
+      <input type="checkbox" th:field="*{student.deleted}" />
+    </div>
   </fieldset>
 
   <fieldset>
