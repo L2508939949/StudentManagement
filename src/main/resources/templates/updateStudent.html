@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>受講生登録</title>
+  <title>受講生更新</title>
   <style>
     form {
        width: 400px;
@@ -63,6 +63,11 @@
       <label>備考:</label>
       <textarea th:field="*{student.remark}" rows="5" cols="40"></textarea><br/>
     </div>
+
+    <div>
+      <label>キャンセル:</label>
+      <input type="checkbox" th:field="*{student.deleted}" />
+    </div>
   </fieldset>
 
   <fieldset>
@@ -82,7 +87,6 @@
       <input type="datetime-local"
              th:value="${courseStartdayFormatted}"
              name="courseStartday"/>
-
     </div>
 
     <label>終了日:</label>
