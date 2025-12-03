@@ -12,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,49 +23,51 @@ import raisetech.StudentManagement.data.StudentsCourses;
 import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.service.StudentService;
 
+/**
+ * 受講生の検索や登録、更新などを行うREST APIとして実行されるControllerです。
+ */
 @RestController
 public class StudentController {
 
   private StudentService service;
-  private StudentConverter converter;
 
   @Autowired
-  public StudentController(StudentService service, StudentConverter converter) {
+  public StudentController(StudentService service) {
     this.service = service;
-    this.converter = converter;
       }
 
+  /**
+   * 受講生一覧検索です。
+   * 全件検索を行うので、条件指定は行いません。
+   *
+   * @return 受講生一覧(全件)
+   */
   @GetMapping("/studentList")
   public List<StudentDetail> getStudentList(){
-    List<Student> students = service.searchStudentList();
-    List<StudentsCourses> studentsCourses = service.searchStudentsCourseList();
-    return converter.convertStudentDetails(students,studentsCourses);
+    return service.searchStudentList();
   }
 
-  @GetMapping("/updateStudentForm")
-  public String  updateStudentForm(@RequestParam("studentID") String studentID,Model model){
-    Student student = service.findStudent(studentID);
-    List<StudentsCourses> courses = service.findCourses(studentID);
-
-    if (courses.isEmpty()) courses.add(new StudentsCourses());
-
-    StudentDetail detail = new StudentDetail();
-    detail.setStudent(student);
-    detail.setCourse(courses.get(0));
-    model.addAttribute("studentDetail", detail);
-    model.addAttribute("oldCourseID", courses.get(0).getCourseID());
-
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
-    if (courses.get(0).getCourseStartday() != null) {
-      model.addAttribute("courseStartdayFormatted",
-          courses.get(0).getCourseStartday().format(formatter));
-    }
-    if (courses.get(0).getCourseEndday() != null) {
-      model.addAttribute("courseEnddayFormatted",
-          courses.get(0).getCourseEndday().format(formatter));
-    }
-    return "updateStudent";
+  /**
+   * 受講生検索です。
+   * IDに紐づく任意の受講生の情報を取得します。
+   *
+   * @param studentID　受講生ID
+   * @return 受講生
+   */
+  @GetMapping("/student/{studentID}")
+  public StudentDetail getStudent(@PathVariable String studentID){
+    return service.searchStudent(studentID);
   }
+
+  /**
+   * 受講生情報と受講生コース情報を更新します。
+   * コースIDも変更できるようにするため、旧コースIDをWHERE条件に持たせます。
+   * @param studentDetail 受講生情報と受講生コース情報
+   * @param oldCourseID 旧受講生ID
+   * @param courseStartdayStr コースの開始日
+   * @param courseEnddayStr　コースの修了日
+   * @return メッセージで更新処理が成功しました。
+   */
 
   @PostMapping("/updateStudent")
   public ResponseEntity<String> updateStudent(@RequestBody StudentDetail studentDetail,
@@ -73,35 +76,42 @@ public class StudentController {
       @RequestParam("courseEndday") String courseEnddayStr) {
 
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
-    if (courseStartdayStr != null && !courseStartdayStr.isEmpty()) {
-      studentDetail.getCourse().setCourseStartday(LocalDateTime.parse(courseStartdayStr, formatter));
+    List<StudentsCourses> courses = studentDetail.getStudentsCourse();
+    if (courses != null && !courses.isEmpty()) {
+      StudentsCourses course = courses.get(0);
+
+      if (courseStartdayStr != null && !courseStartdayStr.isEmpty()) {
+        course.setCourseStartday(LocalDateTime.parse(courseStartdayStr, formatter));
+      }
+      if (courseEnddayStr != null && !courseEnddayStr.isEmpty()) {
+        course.setCourseEndday(LocalDateTime.parse(courseEnddayStr, formatter));
+      }
+
+      service.updateStudent(studentDetail.getStudent());
+      service.updateCourses(studentDetail.getStudent().getStudentID(), oldCourseID, course);
     }
-    if (courseEnddayStr != null && !courseEnddayStr.isEmpty()) {
-      studentDetail.getCourse().setCourseEndday(LocalDateTime.parse(courseEnddayStr, formatter));
-    }
-    service.updateStudent(studentDetail.getStudent());
-    service.updateCourses(studentDetail.getStudent().getStudentID(), oldCourseID, studentDetail.getCourse());
     return ResponseEntity.ok("更新処理が成功しました。");
   }
-
-
-  @GetMapping("/studentsCourseList")
-  public List<StudentsCourses> getStudentsCourseList(){
-    return service.searchStudentsCourseList();
-  }
-
-  @GetMapping("/newStudent")
-  public String newStudent(Model model) {
-    model.addAttribute("studentDetail", new StudentDetail());
-    return "registerStudent";
-  }
-
-
+  /**
+   * 受講生の情報と受講生のコース情報を登録します。
+   * 受講生IDに紐づく受講生コース情報も登録します。
+   * 更新を受講生情報と受講生コース情報を表示します。
+   *
+   * @param studentDetail 　受講生情報と受講生コース情報
+   * @return 受講生情報と受講生コース情報
+   */
   @PostMapping("/registerStudent")
-  public ResponseEntity<String> registerStudent(@RequestBody StudentDetail studentDetail) {
-    service.registerStudentWthCourse
-        (studentDetail.getStudent(),
-            studentDetail.getCourse());
-    return ResponseEntity.ok("更新処理が成功しました。");
+  public ResponseEntity<StudentDetail> registerStudent(@RequestBody StudentDetail studentDetail) {
+    List<StudentsCourses> courses= studentDetail.getStudentsCourse();
+    StudentDetail responseStudentDetail = null;
+
+    if (courses != null && !courses.isEmpty()) {
+      // 1件だけ登録
+      responseStudentDetail = service.registerStudentWthCourse(
+          studentDetail.getStudent(),
+          courses.get(0)
+      );
+    }
+    return ResponseEntity.ok(responseStudentDetail);
   }
 }
