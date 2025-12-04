@@ -2,24 +2,18 @@ package raisetech.StudentManagement.controller;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.Mapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import raisetech.StudentManagement.controller.converter.StudentConverter;
-import raisetech.StudentManagement.data.Student;
-import raisetech.StudentManagement.data.StudentsCourses;
+import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.service.StudentService;
 
@@ -37,10 +31,10 @@ public class StudentController {
       }
 
   /**
-   * 受講生一覧検索です。
+   * 受講生商大の一覧検索です。
    * 全件検索を行うので、条件指定は行いません。
    *
-   * @return 受講生一覧(全件)
+   * @return 受講生詳細一覧(全件)
    */
   @GetMapping("/studentList")
   public List<StudentDetail> getStudentList(){
@@ -48,7 +42,7 @@ public class StudentController {
   }
 
   /**
-   * 受講生検索です。
+   * 受講生詳細の検索です。
    * IDに紐づく任意の受講生の情報を取得します。
    *
    * @param studentID　受講生ID
@@ -61,24 +55,25 @@ public class StudentController {
 
   /**
    * 受講生情報と受講生コース情報を更新します。
+   * キャンセルフラグの更新もここで行います。(論理削除)
    * コースIDも変更できるようにするため、旧コースIDをWHERE条件に持たせます。
    * @param studentDetail 受講生情報と受講生コース情報
    * @param oldCourseID 旧受講生ID
    * @param courseStartdayStr コースの開始日
    * @param courseEnddayStr　コースの修了日
-   * @return メッセージで更新処理が成功しました。
+   * @return 実行結果
    */
 
-  @PostMapping("/updateStudent")
+  @PutMapping("/updateStudent")
   public ResponseEntity<String> updateStudent(@RequestBody StudentDetail studentDetail,
       @RequestParam("oldCourseID") String oldCourseID,
       @RequestParam("courseStartday") String courseStartdayStr,
       @RequestParam("courseEndday") String courseEnddayStr) {
 
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
-    List<StudentsCourses> courses = studentDetail.getStudentsCourse();
+    List<StudentCourse> courses = studentDetail.getStudentCourseList();
     if (courses != null && !courses.isEmpty()) {
-      StudentsCourses course = courses.get(0);
+      StudentCourse course = courses.get(0);
 
       if (courseStartdayStr != null && !courseStartdayStr.isEmpty()) {
         course.setCourseStartday(LocalDateTime.parse(courseStartdayStr, formatter));
@@ -93,16 +88,17 @@ public class StudentController {
     return ResponseEntity.ok("更新処理が成功しました。");
   }
   /**
+   * 受講生詳細の登録を行います。
    * 受講生の情報と受講生のコース情報を登録します。
    * 受講生IDに紐づく受講生コース情報も登録します。
    * 更新を受講生情報と受講生コース情報を表示します。
    *
    * @param studentDetail 　受講生情報と受講生コース情報
-   * @return 受講生情報と受講生コース情報
+   * @return 実行結果
    */
   @PostMapping("/registerStudent")
   public ResponseEntity<StudentDetail> registerStudent(@RequestBody StudentDetail studentDetail) {
-    List<StudentsCourses> courses= studentDetail.getStudentsCourse();
+    List<StudentCourse> courses= studentDetail.getStudentCourseList();
     StudentDetail responseStudentDetail = null;
 
     if (courses != null && !courses.isEmpty()) {
