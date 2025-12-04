@@ -32,9 +32,22 @@ public interface StudentRepository {
   /**
    *　受講生のコース情報の全件検索を行います。
    *
+   * @Select("SELECT * FROM students_courses")から変更、
+   *
+   * Postmanでhttp://localhost:8080/studentListを送信すると、コースの開始日と終了日がnullで表示される。
+   *
+   * 原因：変更理由テーブル(students_courses)の開始日と終了日のテーブルのカラム名とJavaのフィールド名が異なるため、正しくマッピングが一致していなかったため。
+   *
    * @return 受講生のコース情報(全件)
    */
-  @Select("SELECT * FROM students_courses")
+  @Select("SELECT course_id, student_id, course_name, course_st_day, course_ed_day FROM students_courses")
+  @Results({
+      @Result(column="course_id", property="courseID"),
+      @Result(column="student_id", property="studentID"),
+      @Result(column="course_name", property="courseName"),
+      @Result(column="course_st_day", property="courseStartday", javaType=LocalDateTime.class),
+      @Result(column="course_ed_day", property="courseEndday", javaType=LocalDateTime.class)
+  })
   List<StudentsCourses> searchStudentsCourse();
 
   /**
