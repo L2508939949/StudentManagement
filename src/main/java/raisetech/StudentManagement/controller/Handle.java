@@ -22,7 +22,4 @@ public class Handle  extends  RuntimeException{
     super(cause);
   }
 
-  {
-
-
 }
