@@ -1,5 +1,7 @@
 package raisetech.StudentManagement.data;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -7,7 +9,10 @@ import lombok.Setter;
 @Setter
 public class Student {
 
+  @NotNull
+  @Size(min = 10,max = 10)
   private  String studentID;
+
   private  String name;
   private  String kanaName;
   private  String nickName;

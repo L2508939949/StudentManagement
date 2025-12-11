@@ -1,10 +1,14 @@
 package raisetech.StudentManagement.controller;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.Mapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +24,7 @@ import raisetech.StudentManagement.service.StudentService;
 /**
  * 受講生の検索や登録、更新などを行うREST APIとして実行されるControllerです。
  */
+@Validated
 @RestController
 public class StudentController {
 
@@ -49,7 +54,7 @@ public class StudentController {
    * @return 受講生
    */
   @GetMapping("/student/{studentID}")
-  public StudentDetail getStudent(@PathVariable String studentID){
+  public StudentDetail getStudent(@PathVariable @Size(min = 10, max = 10) @NotNull String studentID){
     return service.searchStudent(studentID);
   }
 
@@ -65,8 +70,8 @@ public class StudentController {
    */
 
   @PutMapping("/updateStudent")
-  public ResponseEntity<String> updateStudent(@RequestBody StudentDetail studentDetail,
-      @RequestParam("oldCourseID") String oldCourseID,
+  public ResponseEntity<String> updateStudent(@RequestBody @Valid StudentDetail studentDetail,
+      @RequestParam("oldCourseID") @NotNull @Size(min = 10, max = 10) String oldCourseID,
       @RequestParam("courseStartday") String courseStartdayStr,
       @RequestParam("courseEndday") String courseEnddayStr) {
 
@@ -97,7 +102,7 @@ public class StudentController {
    * @return 実行結果
    */
   @PostMapping("/registerStudent")
-  public ResponseEntity<StudentDetail> registerStudent(@RequestBody StudentDetail studentDetail) {
+  public ResponseEntity<StudentDetail> registerStudent(@RequestBody @Valid StudentDetail studentDetail) {
     List<StudentCourse> courses= studentDetail.getStudentCourseList();
     StudentDetail responseStudentDetail = null;
 
