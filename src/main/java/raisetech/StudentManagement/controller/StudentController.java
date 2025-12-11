@@ -52,14 +52,11 @@ public class StudentController {
   }
 
   /**
-   * 受講生商大の一覧検索です。
-   * 全件検索を行うので、条件指定は行いません。
-   *
-   * @return 受講生詳細一覧(全件)
+   * エラー用のメソッド
    */
   @GetMapping("/students")
-  public List<StudentDetail> getStudentsList() throws TestException {
-    throw new TestException("現在のこのAPIは知用出来ません。URLは「students」ではなく「studentList」を利用してください。");
+  public List<StudentDetail> getStudentsList()  {
+    throw new Handle("現在のこのAPIは知用出来ません。URLは「students」ではなく「studentList」を利用してください。");
     // return service.searchStudentList();
   }
 
