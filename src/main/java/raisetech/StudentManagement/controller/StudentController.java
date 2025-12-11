@@ -1,6 +1,7 @@
 package raisetech.StudentManagement.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
@@ -54,7 +55,7 @@ public class StudentController {
    * @return 受講生
    */
   @GetMapping("/student/{studentID}")
-  public StudentDetail getStudent(@PathVariable @Size(min = 10, max = 10) @NotNull String studentID){
+  public StudentDetail getStudent(@PathVariable @NotBlank @Size(min = 10, max = 10) String studentID){
     return service.searchStudent(studentID);
   }
 
@@ -71,7 +72,7 @@ public class StudentController {
 
   @PutMapping("/updateStudent")
   public ResponseEntity<String> updateStudent(@RequestBody @Valid StudentDetail studentDetail,
-      @RequestParam("oldCourseID") @NotNull @Size(min = 10, max = 10) String oldCourseID,
+      @RequestParam("oldCourseID") @NotBlank @Size(min = 10, max = 10) String oldCourseID,
       @RequestParam("courseStartday") String courseStartdayStr,
       @RequestParam("courseEndday") String courseEnddayStr) {
 
