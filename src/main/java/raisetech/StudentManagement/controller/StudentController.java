@@ -3,19 +3,16 @@ package raisetech.StudentManagement.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.Mapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -58,7 +55,7 @@ public class StudentController {
    */
   @GetMapping("/students")
   public List<StudentDetail> getStudentsList()  {
-    throw new Handle("現在のこのAPIは知用出来ません。URLは「students」ではなく「studentList」を利用してください。");
+    throw new ExceptionHandling("現在のこのAPIは知用出来ません。URLは「students」ではなく「studentList」を利用してください。");
     // return service.searchStudentList();
   }
 
