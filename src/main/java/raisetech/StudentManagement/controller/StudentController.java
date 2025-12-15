@@ -134,7 +134,7 @@ public class StudentController {
   }
 
   @ExceptionHandler(TestException.class)
-  public ResponseEntity<String> handleTestException(TestException ex) {
+  public ResponseEntity<String> handleTestException(ExceptionHandling ex) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
   }
 }
