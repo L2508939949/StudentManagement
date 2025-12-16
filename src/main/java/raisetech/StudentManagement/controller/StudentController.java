@@ -1,5 +1,6 @@
 package raisetech.StudentManagement.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -42,6 +43,10 @@ public class StudentController {
    *
    * @return 受講生詳細一覧(全件)
    */
+  @Operation(
+      summary = "一覧検索",
+      description = "受講生の一覧を検索します。"
+  )
   @GetMapping("/studentList")
   public List<StudentDetail> getStudentList(){
     return service.searchStudentList();
@@ -50,9 +55,14 @@ public class StudentController {
   /**
    * エラー用のメソッド
    */
+  @Operation(
+      summary = "使用不可API",
+      description = "このAPIは使用できません。/studentList を利用してください。"
+  )
   @GetMapping("/students")
   public List<StudentDetail> getStudentsList()  {
     throw new ExceptionHandling("現在のこのAPIは知用出来ません。URLは「students」ではなく「studentList」を利用してください。");
+    // return service.searchStudentList();
   }
 
   /**
@@ -62,6 +72,11 @@ public class StudentController {
    * @param studentID　受講生ID
    * @return 受講生
    */
+  @Operation(
+      summary = "受講生詳細の検索です",
+      description = "IDに紐づく任意の受講生の情報を取得します。",
+      operationId = "getStudentID"
+  )
   @GetMapping("/student/{studentID}")
   public StudentDetail getStudent(
       @PathVariable @NotBlank @Size(min = 10, max = 10) String studentID){
@@ -78,6 +93,12 @@ public class StudentController {
    * @param courseEnddayStr　コースの修了日
    * @return 実行結果
    */
+
+  @Operation(
+      summary = "受講生情報と受講生コース情報を更新します",
+      description = "コースIDも変更できるようにするため、旧コースIDをWHERE条件に持たせます。",
+      operationId = "updateStudent"
+  )
 
   @PutMapping("/updateStudent")
   public ResponseEntity<String> updateStudent(
@@ -112,6 +133,12 @@ public class StudentController {
    * @param studentDetail 　受講生情報と受講生コース情報
    * @return 実行結果
    */
+
+  @Operation(
+      summary ="受講生登録",
+      description = "受講生を登録します。",
+      operationId = "registerStudent"
+  )
   @PostMapping("/registerStudent")
   public ResponseEntity<StudentDetail> registerStudent(@RequestBody @Valid StudentDetail studentDetail) {
     List<StudentCourse> courses= studentDetail.getStudentCourseList();
@@ -129,7 +156,7 @@ public class StudentController {
 
   @ExceptionHandler(ExceptionHandling.class)
   public ResponseEntity<String> handleException(ExceptionHandling ex){
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+  return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
   }
-
 }
+
