@@ -1,47 +1,94 @@
 package raisetech.StudentManagement.service;
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import org.apache.ibatis.annotations.Update;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import raisetech.StudentManagement.controller.converter.StudentConverter;
 import raisetech.StudentManagement.data.Student;
-import raisetech.StudentManagement.data.StudentsCourses;
+import raisetech.StudentManagement.data.StudentCourse;
+import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.repository.StudentRepository;
 
+/**
+ * 受講生情報を取り扱うサービスです。
+ * 受講生の検索や登録・更新処理を行います。
+ */
 @Service
 public class StudentService {
 
   private StudentRepository repository;
+  private StudentConverter converter;
 
   @Autowired
-  public StudentService(StudentRepository repository) {
+  public StudentService(StudentRepository repository, StudentConverter converter) {
     this.repository = repository;
+    this.converter = converter;
   }
 
-  public List<Student> searchStudentList(){
-    return repository.search();
+  /**
+   * 受講生詳細の一覧検索です。
+   * 全件検索を行うので、条件指定は行いません。
+   * @return 受講生詳細一覧(全体)
+   */
+  public List<StudentDetail> searchStudentList(){
+    List<Student> studentList = repository.search();
+    List<StudentCourse> studentCourseList = repository.searchStudentCourseList();
+    return converter.convertStudentDetails(studentList, studentCourseList);
   }
-  public List<StudentsCourses> searchStudentsCourseList(){
-    return repository.searchStudentsCourse();
-  }
-
+  /**
+   * 受講生の検索を行います。
+   * @param studentID 受講生ID
+   * @return 受講生ID
+   */
   public  Student findStudent(String studentID){
     return repository.findStudentByID(studentID);
   }
 
-  public List<StudentsCourses> findCourses(String studentID) {
-    return repository.findCoursesByStudentID(studentID);
+  /**
+   * 受講生IDに紐づく受講生コース情報を検索します。
+   *
+   * @param studentID　受講生ID
+   * @return 受講生IDに紐づく受講生コース情報
+   */
+  public List<StudentCourse> findCourse(String studentID) {
+    return repository.findStudentCourseByStudentID(studentID);
   }
 
+  /**
+   * 受講生詳細検索です。
+   * IDに紐づく受講生情報を取得したあと、その受講生に紐づく受講生コースを取得して設定します。
+   *
+   * @param studentID　受講生ID
+   * @return 受講生詳細
+   */
+  public StudentDetail searchStudent(String studentID) {
+    Student student = repository.findStudentByID(studentID);
+    List<StudentCourse> studentCourse = repository.findStudentCourseByStudentID(studentID);
+    return new StudentDetail(student, studentCourse);
+  }
+
+  /**
+   * 受講生詳細の更新を行います。
+   * 受講生と受講生コース情報をそれぞれ更新します。
+   * @param student　受講生
+   */
   @Transactional
   public void updateStudent(Student student) {
     repository.updateStudent(student);
   }
 
+  /**
+   * 受講生IDに紐づく受講生コース情報を更新します。
+   * コースIDも変更できるようにするため、旧コースIDをWHERE条件に持たせます。
+   * コース情報を全て更新するため、コース情報を全て取得して更新します。
+   * @param studentID　受講生ID
+   * @param oldCourseID 旧受講生ID
+   * @param course コース情報ID
+   */
   @Transactional
-  public void updateCourses(String studentID, String oldCourseID, StudentsCourses course) {
+  public void updateCourses(String studentID, String oldCourseID, StudentCourse course) {
     repository.updateStudentCourse(
         studentID,
         oldCourseID,
@@ -52,11 +99,25 @@ public class StudentService {
     );
   }
 
+  /**
+   * 受講生詳細の登録を行います。
+   * 受講生の情報と受講生のコース情報を個別に登録し、熟考性コース情報には、受講生IDに紐づける値とコースの開始日と終了日受を設定します。
+   * @param student　受講生
+   * @param course　コース情報
+   * @return 登録情報を付与した受講生詳細
+   */
   @Transactional
-  public  void  registerStudentWthCourse(Student student, StudentsCourses course){
-    repository.insert(student);
+  public StudentDetail registerStudentWthCourse(Student student, StudentCourse course){
+    repository.insertStudent(student);
 
     course.setStudentID(student.getStudentID());
     repository.insertStudentCourse(course);
+
+    StudentDetail detail = new StudentDetail();
+    detail.setStudent(student);
+    List<StudentCourse> courses = new ArrayList<>();
+    courses.add(course);
+    detail.setStudentCourseList(courses);
+    return detail;
   }
 }
