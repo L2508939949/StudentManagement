@@ -27,9 +27,11 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -56,15 +58,17 @@ class StudentControllerTest {
   @Test
   void 受講生詳細の一覧検索が実行できて空のリストが返ってくること() throws Exception {
       mockMvc.perform(get("/studentList"))
-        .andExpect(status().isOk());
+        .andExpect(status().isOk())
+        .andExpect(content().json("[]"));
 
     verify(service,times(1)).searchStudentList();
   }
 
   @Test
   void students_APIは例外で返ってくること() throws Exception {
-    mockMvc.perform(get("/students")).
-        andExpect(status().is4xxClientError());
+    mockMvc.perform(get("/students"))
+        .andExpect(status().is4xxClientError())
+        .andExpect(content().string("現在のこのAPIは知用出来ません。URLは「students」ではなく「studentList」を利用してください。"));
   }
 
   @Test
@@ -139,7 +143,7 @@ class StudentControllerTest {
     """;
     mockMvc.perform(
         post("/registerStudent")
-            .contentType("application/json")
+            .contentType(MediaType.APPLICATION_JSON)
             .content(json)
     )
         .andExpect(status().isOk());
