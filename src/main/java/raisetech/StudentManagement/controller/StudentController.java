@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.StudentDetail;
-import raisetech.StudentManagement.exception.TestException;
 import raisetech.StudentManagement.service.StudentService;
 
 /**
@@ -105,6 +104,7 @@ public class StudentController {
       service.updateStudent(studentDetail.getStudent());
       service.updateCourses(studentDetail.getStudent().getStudentID(), oldCourseID, course);
     }
+
     return ResponseEntity.ok("更新処理が成功しました。");
   }
   /**
@@ -133,7 +133,7 @@ public class StudentController {
     return ResponseEntity.ok(responseStudentDetail);
   }
 
-  @ExceptionHandler(TestException.class)
+  @ExceptionHandler(ExceptionHandling.class)
   public ResponseEntity<String> handleTestException(ExceptionHandling ex) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
   }

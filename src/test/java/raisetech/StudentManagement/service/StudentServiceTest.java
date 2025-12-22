@@ -145,7 +145,6 @@ class StudentServiceTest {
     verify(repositoryl,times(1)).insertStudent(student);
     verify(repositoryl,times(1)).insertStudentCourse(course);
 
-    //検証後の追加
     assertEquals("st00000001",course.getStudentID());//st0000001とcousesのgetStudentIDが一緒か
     assertNotNull(actual);
     assertEquals(student,actual.getStudent());
