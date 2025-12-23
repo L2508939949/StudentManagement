@@ -55,7 +55,7 @@ class StudentControllerTest {
 
   @Test
   void 受講生詳細の一覧検索が実行できて空のリストが返ってくること() throws Exception {
-      mockMvc.perform(get("/studentList"))
+    mockMvc.perform(get("/studentList"))
         .andExpect(status().isOk());
 
     verify(service,times(1)).searchStudentList();
@@ -70,12 +70,13 @@ class StudentControllerTest {
   @Test
   void 受講生IAを指定して受講生詳細が取得できること() throws Exception {
     String studentID = "st00000001";
-
     StudentDetail mockstudentDetail = new StudentDetail();
+
     when(service.searchStudent(studentID)).thenReturn(mockstudentDetail);
 
     mockMvc.perform(get("/student/{studentID}",studentID))
         .andExpect(status().isOk());
+
     verify(service,times(1)).searchStudent(studentID);
   }
 
@@ -96,7 +97,7 @@ class StudentControllerTest {
             }
           ]
         }
-        """;
+    """;
 
     mockMvc.perform(
         put("/updateStudent")
@@ -137,17 +138,19 @@ class StudentControllerTest {
           ]
        }
     """;
+
     mockMvc.perform(
         post("/registerStudent")
             .contentType("application/json")
             .content(json)
-    )
+        )
         .andExpect(status().isOk());
+
     verify(service,times(1)).registerStudentWthCourse(any(), any());
   }
 
   @Test
-  void 受講生詳細の受講生で適せつな値を入力した時に入力チェックに掛かること(){
+  void 受講生詳細の受講生で適切な値を入力した時に入力チェックに掛かること(){
     Student student = new Student();
     student.setStudentID("st00000001");
     student.setName("山田太郎");
@@ -165,7 +168,7 @@ class StudentControllerTest {
   @Test
   void 受講生詳細の受講生でIDに数字以外を用いたときに入力チェックに掛かること(){
     Student student = new Student();
-    student.setStudentID("テストです。");
+    student.setStudentID("st0000001");
     student.setName("山田太郎");
     student.setKanaName("ヤマダタロウ");
     student.setNickName("タロウ");
@@ -176,18 +179,17 @@ class StudentControllerTest {
     Set<ConstraintViolation<Student>> violations = validator.validate(student);
 
     assertThat(violations.size()).isEqualTo(1);
-    assertThat(violations).extracting("message").
-        containsOnly("数字のみ入力するようにしてください。");
+    assertThat(violations).extracting("message")
+        .containsOnly("10 から 10 の間のサイズにしてください");
   }
 
   @Test
   void 受講生IAを指定した内容に10桁以外のとき入力チェックに掛かること() throws Exception {
     String studentID = "st000001";
 
-    ServletException exception =
-        assertThrows(ServletException.class, () -> {
-          mockMvc.perform(get("/student/{studentID}", studentID)).andReturn();
-        });
+    ServletException exception = assertThrows(ServletException.class, () -> {
+      mockMvc.perform(get("/student/{studentID}", studentID)).andReturn();
+    });
 
     assertThat(exception.getCause())
         .isInstanceOf(ConstraintViolationException.class);
@@ -198,6 +200,7 @@ class StudentControllerTest {
   @Test
   void 受講生登録時にコース情報のコースIDが10桁以外のとき入力チェックに掛かること() throws Exception {
     StudentDetail response = new StudentDetail();
+
     when(service.registerStudentWthCourse(any(), any()))
         .thenReturn(response);
 
@@ -223,6 +226,7 @@ class StudentControllerTest {
             .content(json)
         )
         .andExpect(status().isBadRequest());
+
     verify(service,times(0)).registerStudentWthCourse(any(), any());
   }
 }
