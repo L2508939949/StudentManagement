@@ -26,11 +26,5 @@ public class StudentCourse {
   private LocalDateTime courseStartday;
   private LocalDateTime courseEndday;
 
-  public StudentCourse(String courseID, String courseName,
-      LocalDateTime courseStartday, LocalDateTime courseEndday) {
-    this.courseID = courseID;
-    this.courseName = courseName;
-    this.courseStartday = courseStartday;
-    this.courseEndday = courseEndday;
-  }
+
 }
