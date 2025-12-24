@@ -15,15 +15,22 @@ public class StudentCourse {
 
   @NotBlank
   @Size(min = 10, max = 10)
-  private  String courseID;
+  private String courseID;
 
   @NotBlank
   @Size(min = 10, max = 10)
-  private  String studentID;
+  private String studentID;
 
   @NotBlank
-  private  String courseName;
-  private  LocalDateTime courseStartday ;
-  private  LocalDateTime courseEndday ;
+  private String courseName;
+  private LocalDateTime courseStartday;
+  private LocalDateTime courseEndday;
 
+  public StudentCourse(String courseID, String courseName,
+      LocalDateTime courseStartday, LocalDateTime courseEndday) {
+    this.courseID = courseID;
+    this.courseName = courseName;
+    this.courseStartday = courseStartday;
+    this.courseEndday = courseEndday;
+  }
 }
