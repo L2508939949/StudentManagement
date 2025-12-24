@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="raisetech.StudentManagement.repository.StudentRepository">
 
   <!-- 受講生の全件検索 -->
@@ -16,7 +17,7 @@
     <result column="course_st_day" property="courseStartday" javaType="java.time.LocalDateTime"/>
     <result column="course_ed_day" property="courseEndday" javaType="java.time.LocalDateTime"/>
   </resultMap>
-  
+
   <!-- 受講生の全件検索 -->
   <select id="searchStudentCourseList" resultMap="StudentCourseResultMap">
     SELECT course_id, student_id, course_name, course_st_day, course_ed_day
@@ -37,10 +38,27 @@
     WHERE student_id = #{studentID}
   </select>
 
+
+  <!--受講生のコース情報の全件検索-->
+  <select id="searchCourseApplcationList" resultMap="StudentCourseResultMap">
+    SELECT application_id, student_id, course_id,status
+    FROM course_applications
+  </select>
+
+  <!--受講生のコース情報の検索-->
+  <select id="findCourseApplcationByApplcationID" resultMap="StudentCourseResultMap">
+    SELECT application_id, student_id, course_id,status
+    FROM course_applications
+    WHERE student_id = #{studentID} AND course_id = #{courseID}
+  </select>
+
+
   <!--受講生を新規登録します。-->
   <insert id="insertStudent">
-    INSERT INTO students (student_id, name, kana_name, nickname, email, area, age, gender, remark, isDeleted)
-    VALUES (#{studentID}, #{name}, #{kanaName}, #{nickName}, #{email}, #{area}, #{age}, #{gender}, #{remark}, #{isDeleted})
+    INSERT INTO students (student_id, name, kana_name, nickname, email, area, age, gender, remark,
+    isDeleted)
+    VALUES (#{studentID}, #{name}, #{kanaName}, #{nickName}, #{email}, #{area}, #{age}, #{gender},
+    #{remark}, #{isDeleted})
   </insert>
 
   <!--受講生IDに紐づく受講生コース情報を新規登録します。-->
@@ -49,18 +67,26 @@
     VALUES (#{courseID}, #{studentID}, #{courseName}, #{courseStartday}, #{courseEndday})
   </insert>
 
+
+  <!--受講生IDに紐づく受講生コース情報を新規登録します。-->
+  <insert id="insertCourseApplcation">
+    INSERT INTO course_applications (application_id, student_id, course_id,status)
+    VALUES (#{applicationID}, #{studentID}, #{courseID}, #{status})
+  </insert>
+
+
   <!--受講生を更新します。-->
   <update id="updateStudent">
     UPDATE students SET
-      name = #{name},
-      kana_name = #{kanaName},
-      nickname = #{nickName},
-      email = #{email},
-      area = #{area},
-      age = #{age},
-      gender = #{gender},
-      remark = #{remark},
-      isDeleted =#{isDeleted}
+    name = #{name},
+    kana_name = #{kanaName},
+    nickname = #{nickName},
+    email = #{email},
+    area = #{area},
+    age = #{age},
+    gender = #{gender},
+    remark = #{remark},
+    isDeleted =#{isDeleted}
     WHERE student_id = #{studentID}
   </update>
 
@@ -68,12 +94,30 @@
   <!--コースIDも変更できるようにするため、旧コースIDをWHERE条件に持たせます。-->
   <update id="updateStudentCourse">
     UPDATE students_courses SET
-      course_id = #{newCourseID},
-      course_name = #{courseName},
-      course_st_day = #{courseStartday},
-      course_ed_day = #{courseEndday}
+    course_id = #{newCourseID},
+    course_name = #{courseName},
+    course_st_day = #{courseStartday},
+    course_ed_day = #{courseEndday}
     WHERE course_id = #{oldCourseID} AND
     student_id = #{studentID}
   </update>
+
+
+  <!--受講生IDに紐づく受講生コース情報を新規登録します。-->
+  <insert id="insertCourseApplcation">
+    INSERT INTO course_applications (application_id, student_id, course_id,status)
+    VALUES (#{applicationID}, #{studentID}, #{courseID}, #{status})
+  </insert>
+
+  <update id="updateCourseApplcation">
+    UPDATE course_applications SET
+    course_id = #{newCourseID},
+    course_name = #{courseName},
+    course_st_day = #{courseStartday},
+    course_ed_day = #{courseEndday}
+    WHERE course_id = #{oldCourseID} AND
+    student_id = #{studentID}
+  </update>
+
 
 </mapper>
