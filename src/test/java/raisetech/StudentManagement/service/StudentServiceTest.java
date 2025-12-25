@@ -57,47 +57,47 @@ class StudentServiceTest {
 
   @Test
   void 受講生IDの検索_リポジトリの検索処理が1回呼び出され結果が返ること() {
-    String studentID = "st00000001";
+    String studentId = "st00000001";
     Student student = new Student();
 
-    when(repository.findStudentByID(studentID)).thenReturn(student);
+    when(repository.findStudentById(studentId)).thenReturn(student);
 
-    Student actual = sut.findStudent(studentID);
-    verify(repository, times(1)).findStudentByID(studentID);
+    Student actual = sut.findStudent(studentId);
+    verify(repository, times(1)).findStudentById(studentId);
     assertThat(actual).isEqualTo(student);
   }
 
 
   @Test
   void 受講生コース検索_受講生IDに紐づくコース情報が取得できること() {
-    String studentID = "st00000001";
+    String studentId = "st00000001";
     List<StudentCourse> studentCourse = new ArrayList<>();
 
-    when(repository.findStudentCourseByStudentID(studentID)).thenReturn(studentCourse);
+    when(repository.findStudentCourseByStudentId(studentId)).thenReturn(studentCourse);
 
-    List<StudentCourse> actual = sut.findCourse(studentID);
+    List<StudentCourse> actual = sut.findCourse(studentId);
     assertEquals(studentCourse, actual);
 
-    verify(repository, times(1)).findStudentCourseByStudentID(studentID);
+    verify(repository, times(1)).findStudentCourseByStudentId(studentId);
   }
 
 
   @Test
   void 受講生詳細検索_IDに紐づく受講生とコースが返ること() {
-    String studentID = "st00000001";
+    String studentId = "st00000001";
     Student student = new Student();
     List<StudentCourse> courses = new ArrayList<>();
 
-    when(repository.findStudentByID(studentID)).thenReturn(student);
-    when(repository.findStudentCourseByStudentID(studentID)).thenReturn(courses);
+    when(repository.findStudentById(studentId)).thenReturn(student);
+    when(repository.findStudentCourseByStudentId(studentId)).thenReturn(courses);
 
-    StudentDetail actual = sut.searchStudent(studentID);
+    StudentDetail actual = sut.searchStudent(studentId);
 
     assertEquals(student, actual.getStudent());
     assertEquals(courses, actual.getStudentCourseList());
 
-    verify(repository, times(1)).findStudentByID(studentID);
-    verify(repository, times(1)).findStudentCourseByStudentID(studentID);
+    verify(repository, times(1)).findStudentById(studentId);
+    verify(repository, times(1)).findStudentCourseByStudentId(studentId);
   }
 
 
@@ -118,14 +118,11 @@ class StudentServiceTest {
 
     StudentCourse course = new StudentCourse(
         "co00000002",
+        studentId,
         "java応用コース",
         courseStartday,
         courseEndday
     );
-    //   course.setCourseID("co00000002");
-    //  course.setCourseName("java応用コース");
-    //   course.setCourseStartday(courseStartday);
-    //   course.setCourseEndday(courseEndday);
 
     sut.updateCourses(studentId, oldcourseId, course);
 
@@ -139,15 +136,14 @@ class StudentServiceTest {
     );
   }
 
-
   @Test
   void 受講生登録_受講生とコースが登録され受講生詳細が返ること() {
     Student student = new Student();
-    student.setStudentID("st00000001");
+    student.setStudentId("st00000001");
     student.setName("山田太郎");
 
     StudentCourse course = new StudentCourse();
-    course.setCourseID("co00000001");
+    course.setCourseId("co00000001");
     course.setCourseName("java基礎コース");
 
     StudentDetail actual = sut.registerStudentWthCourse(student, course);
@@ -155,7 +151,7 @@ class StudentServiceTest {
     verify(repository, times(1)).insertStudent(student);
     verify(repository, times(1)).insertStudentCourse(course);
 
-    assertEquals("st00000001", course.getStudentID());
+    assertEquals("st00000001", course.getStudentId());
     assertNotNull(actual);
     assertEquals(student, actual.getStudent());
 
