@@ -58,7 +58,7 @@ class StudentControllerTest {
     mockMvc.perform(get("/studentList"))
         .andExpect(status().isOk());
 
-    verify(service,times(1)).searchStudentList();
+    verify(service, times(1)).searchStudentList();
   }
 
   @Test
@@ -69,47 +69,52 @@ class StudentControllerTest {
 
   @Test
   void 受講生IAを指定して受講生詳細が取得できること() throws Exception {
-    String studentID = "st00000001";
+    String studentId = "st00000001";
     StudentDetail mockstudentDetail = new StudentDetail();
 
-    when(service.searchStudent(studentID)).thenReturn(mockstudentDetail);
+    when(service.searchStudent(studentId)).thenReturn(mockstudentDetail);
 
-    mockMvc.perform(get("/student/{studentID}",studentID))
+    mockMvc.perform(get("/student/{studentId}", studentId))
         .andExpect(status().isOk());
 
-    verify(service,times(1)).searchStudent(studentID);
+    verify(service, times(1)).searchStudent(studentId);
   }
 
   @Test
   void 受講生情報とコース情報が更新できること() throws Exception {
 
     String json = """
-        {
-          "student" :{
-            "studentID" :"st00000001",
-            "name" : "山田太郎"
-          },
-          "studentCourseList":[
             {
-              "studentID" :"st00000001",
-              "courseID" : "co00000001",
-              "courseName" : "java基礎コース"
+              "student" :{
+                "studentId" :"st00000001",
+                "name" : "山田太郎",
+                "kanaName": "ヤマダタロウ",
+                "nickName": "タロウ",
+                "email": "test@example.com",
+                "area": "大阪府",
+                "gender": "男性"
+              },
+              "studentCourseList":[
+                {
+                  "studentId" :"st00000001",
+                  "courseId" : "co00000001",
+                  "courseName" : "java基礎コース"
+                }
+              ]
             }
-          ]
-        }
-    """;
+        """;
 
     mockMvc.perform(
         put("/updateStudent")
             .contentType("application/json")
-            .param("oldCourseID","co00000001")
-            .param("courseStartday","2025-12-17T00:00")
-            .param("courseEndday","2026-01-16T00:00")
+            .param("oldCourseId", "co00000001")
+            .param("courseStartday", "2025-12-17T00:00")
+            .param("courseEndday", "2026-01-16T00:00")
             .content(json)
     ).andExpect(status().isOk()).andExpect(content().string("更新処理が成功しました。"));
 
-    verify(service,times(1)).updateStudent(any());
-    verify(service,times(1))
+    verify(service, times(1)).updateStudent(any());
+    verify(service, times(1))
         .updateCourses(
             eq("st00000001"),
             eq("co00000001"),
@@ -124,35 +129,40 @@ class StudentControllerTest {
         .thenReturn(response);
 
     String json = """
-        {
-          "student":{
-          "studentID" :"st00000001",
-          "name" : "山田太郎"
-          },
-          "studentCourseList":[
             {
-            "studentID" :"st00000001",
-            "courseID": "co00000001",
-            "courseName":"java基礎コース"
-            }
-          ]
-       }
-    """;
+              "student":{
+              "studentId" :"st00000001",
+              "name" : "山田太郎",
+                "kanaName": "ヤマダタロウ",
+                "nickName": "タロウ",
+                "email": "test@example.com",
+                "area": "大阪府",
+                "gender": "男性"
+              },
+              "studentCourseList":[
+                {
+                "studentId" :"st00000001",
+                "courseId": "co00000001",
+                "courseName":"java基礎コース"
+                }
+              ]
+           }
+        """;
 
     mockMvc.perform(
-        post("/registerStudent")
-            .contentType("application/json")
-            .content(json)
+            post("/registerStudent")
+                .contentType("application/json")
+                .content(json)
         )
         .andExpect(status().isOk());
 
-    verify(service,times(1)).registerStudentWthCourse(any(), any());
+    verify(service, times(1)).registerStudentWthCourse(any(), any());
   }
 
   @Test
-  void 受講生詳細の受講生で適切な値を入力した時に入力チェックに掛かること(){
+  void 受講生詳細の受講生で適切な値を入力した時に入力チェックに掛かること() {
     Student student = new Student();
-    student.setStudentID("st00000001");
+    student.setStudentId("st00000001");
     student.setName("山田太郎");
     student.setKanaName("ヤマダタロウ");
     student.setNickName("タロウ");
@@ -166,9 +176,9 @@ class StudentControllerTest {
   }
 
   @Test
-  void 受講生詳細の受講生でIDに数字以外を用いたときに入力チェックに掛かること(){
+  void 受講生詳細の受講生でIDに数字以外を用いたときに入力チェックに掛かること() {
     Student student = new Student();
-    student.setStudentID("st0000001");
+    student.setStudentId("st0000001");
     student.setName("山田太郎");
     student.setKanaName("ヤマダタロウ");
     student.setNickName("タロウ");
@@ -185,10 +195,10 @@ class StudentControllerTest {
 
   @Test
   void 受講生IAを指定した内容に10桁以外のとき入力チェックに掛かること() throws Exception {
-    String studentID = "st000001";
+    String studentId = "st000001";
 
     ServletException exception = assertThrows(ServletException.class, () -> {
-      mockMvc.perform(get("/student/{studentID}", studentID)).andReturn();
+      mockMvc.perform(get("/student/{studentId}", studentId)).andReturn();
     });
 
     assertThat(exception.getCause())
@@ -198,35 +208,41 @@ class StudentControllerTest {
   }
 
   @Test
-  void 受講生登録時にコース情報のコースIDが10桁以外のとき入力チェックに掛かること() throws Exception {
+  void 受講生登録時にコース情報のコースIDが10桁以外のとき入力チェックに掛かること()
+      throws Exception {
     StudentDetail response = new StudentDetail();
 
     when(service.registerStudentWthCourse(any(), any()))
         .thenReturn(response);
 
     String json = """
-        {
-          "student":{
-          "studentID" :"st00000001",
-          "name" : "山田太郎"
-          },
-          "studentCourseList":[
             {
-            "studentID" :"st00000001",
-            "courseID": "co000001",
-            "courseName":"java基礎コース"
+              "student":{
+              "studentId" :"st00000001",
+              "name" : "山田太郎",
+              "kanaName": "ヤマダタロウ",
+              "nickName": "タロウ",
+              "email": "test@example.com",
+              "area": "大阪府",
+              "gender": "男性"
+              },
+              "studentCourseList":[
+                {
+                "studentId" :"st00000001",
+                "courseId": "co000001",
+                "courseName":"java基礎コース"
+                }
+              ]
             }
-          ]
-        }
-    """;
+        """;
 
     mockMvc.perform(
-        post("/registerStudent")
-            .contentType("application/json")
-            .content(json)
+            post("/registerStudent")
+                .contentType("application/json")
+                .content(json)
         )
         .andExpect(status().isBadRequest());
 
-    verify(service,times(0)).registerStudentWthCourse(any(), any());
+    verify(service, times(0)).registerStudentWthCourse(any(), any());
   }
 }
