@@ -18,7 +18,6 @@ import lombok.Setter;
 public class Student {
 
   @Size(min = 10, max = 10)
-  @Size(min = 10, max = 10)
   @NotBlank
   private String studentId;
 
