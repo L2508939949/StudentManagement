@@ -6,22 +6,18 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
-@Schema(description = "受講生")
+@Schema(description = "コースの申込状況")
 @Getter
 @Setter
-public class CourseApplications {
+public class CourseApplication {
 
   @Size(min = 10, max = 10)
   @NotBlank
-  private String applicationID;
-
-  @Size(min = 10, max = 10)
-  @NotBlank
-  private String studentID;
+  private String applicationId;
 
   @NotBlank
   @Size(min = 10, max = 10)
-  private String courseID;
+  private String courseId;
 
   private String status;
 

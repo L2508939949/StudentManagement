@@ -2,13 +2,9 @@ package raisetech.StudentManagement.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Result;
-import org.apache.ibatis.annotations.Results;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import raisetech.StudentManagement.data.CourseApplication;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 
@@ -39,22 +35,41 @@ public interface StudentRepository {
   /**
    * 受講生の検索を行います。
    *
-   * @param studentID 受講生ID
+   * @param studentId 受講生ID
    * @return 受講生
    */
-  Student findStudentByID(String studentID);
+  Student findStudentById(String studentId);
 
   /**
    * 受講生IDに紐づく受講生コース情報を検索します。
    *
-   * @param studentID 受講生ID
+   * @param studentId 受講生ID
    * @return 受講生IDに紐づく受講生コース情報
    */
-  List<StudentCourse> findStudentCourseByStudentID(String studentID);
+  List<StudentCourse> findStudentCourseByStudentId(String studentId);
 
-  List<CourseApplcation> searchCourseApplcationList();
 
-  CourseApplcation findCourseApplcationByApplcationID(String applicationId);
+  /**
+   * コースの申込状況の全件検索
+   *
+   * @return 全件検索したコースの申込状況の一覧
+   */
+  List<CourseApplication> searchCourseApplcationList();
+
+  /**
+   * 指定したコースの申込状況が検索されるようにする。
+   *
+   * @param courseId
+   * @return
+   */
+  CourseApplication findCourseApplicationByCourseId(String courseId);
+
+  void insertCourseApplication(CourseApplication application);
+
+  void updateCourseApplicationStatus(
+      @Param("courseId") String courseId,
+      @Param("status") String status
+  );
 
 
   /**
@@ -81,14 +96,14 @@ public interface StudentRepository {
   /**
    * 受講生コース情報を更新します。 コースIDも変更できるようにするため、旧コースIDをWHERE条件に持たせます。
    *
-   * @param studentID      受講生ID
-   * @param oldCourseID    新コースID
-   * @param newCourseID    旧コースID
+   * @param studentId      受講生ID
+   * @param oldCourseId    新コースID
+   * @param newCourseId    旧コースID
    * @param courseName     コース名
    * @param courseStartday コースの開始日
    * @param courseEndday   コースの終了日
    */
-  void updateStudentCourse(String studentID, String oldCourseID, String newCourseID,
+  void updateStudentCourse(String studentId, String oldCourseId, String newCourseId,
       String courseName, @Param("courseStartday") LocalDateTime courseStartday,
       @Param("courseEndday") LocalDateTime courseEndday);
 
