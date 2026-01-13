@@ -57,18 +57,19 @@ class StudentControllerTest {
 
   @Test
   void 受講生詳細の一覧検索が実行できて空のリストが返ってくること() throws Exception {
-      mockMvc.perform(get("/studentList"))
+    mockMvc.perform(get("/studentList"))
         .andExpect(status().isOk())
         .andExpect(content().json("[]"));
 
-    verify(service,times(1)).searchStudentList();
+    verify(service, times(1)).searchStudentList();
   }
 
   @Test
   void students_APIは例外で返ってくること() throws Exception {
     mockMvc.perform(get("/students"))
         .andExpect(status().is4xxClientError())
-        .andExpect(content().string("現在のこのAPIは知用出来ません。URLは「students」ではなく「studentList」を利用してください。"));
+        .andExpect(content().string(
+            "現在のこのAPIは知用出来ません。URLは「students」ではなく「studentList」を利用してください。"));
   }
 
   @Test
@@ -78,9 +79,9 @@ class StudentControllerTest {
     StudentDetail mockstudentDetail = new StudentDetail();
     when(service.searchStudent(studentID)).thenReturn(mockstudentDetail);
 
-    mockMvc.perform(get("/student/{studentID}",studentID))
+    mockMvc.perform(get("/student/{studentID}", studentID))
         .andExpect(status().isOk());
-    verify(service,times(1)).searchStudent(studentID);
+    verify(service, times(1)).searchStudent(studentID);
   }
 
   @Test
@@ -105,14 +106,14 @@ class StudentControllerTest {
     mockMvc.perform(
         put("/updateStudent")
             .contentType("application/json")
-            .param("oldCourseID","co00000001")
-            .param("courseStartday","2025-12-17T00:00")
-            .param("courseEndday","2026-01-16T00:00")
+            .param("oldCourseID", "co00000001")
+            .param("courseStartday", "2025-12-17T00:00")
+            .param("courseEndday", "2026-01-16T00:00")
             .content(json)
     ).andExpect(status().isOk()).andExpect(content().string("更新処理が成功しました。"));
 
-    verify(service,times(1)).updateStudent(any());
-    verify(service,times(1))
+    verify(service, times(1)).updateStudent(any());
+    verify(service, times(1))
         .updateCourses(
             eq("st00000001"),
             eq("co00000001"),
@@ -127,39 +128,42 @@ class StudentControllerTest {
         .thenReturn(response);
 
     String json = """
-        {
-          "student":{
-          "studentID" :"st00000001",
-          "name" : "山田太郎"
-          },
-          "studentCourseList":[
             {
-            "studentID" :"st00000001",
-            "courseID": "co00000001",
-            "courseName":"java基礎コース"
-            }
-          ]
-       }
-    """;
+              "student":{
+              "studentID" :"st00000001",
+              "name" : "山田太郎"
+              },
+              "studentCourseList":[
+                {
+                "studentID" :"st00000001",
+                "courseID": "co00000001",
+                "courseName":"java基礎コース"
+                }
+              ]
+           }
+        """;
     mockMvc.perform(
-        post("/registerStudent")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(json)
-    )
+            post("/registerStudent")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+        )
         .andExpect(status().isOk());
-    verify(service,times(1)).registerStudentWthCourse(any(), any());
+    verify(service, times(1)).registerStudentWthCourse(any(), any());
   }
 
   @Test
-  void 受講生詳細の受講生で適せつな値を入力した時に入力チェックに掛かること(){
-    Student student = new Student();
-    student.setStudentID("st00000001");
-    student.setName("山田太郎");
-    student.setKanaName("ヤマダタロウ");
-    student.setNickName("タロウ");
-    student.setEmail("test@example.com");
-    student.setArea("大阪府");
-    student.setGender("男性");
+  void 受講生詳細の受講生で適せつな値を入力した時に入力チェックに掛かること() {
+    Student student = new Student("st00000001",
+        "山田太郎",
+        "ヤマダタロウ",
+        "タロウ",
+        "test@example.com",
+        "大阪府",
+        40,
+        "男性",
+        "",
+        false
+    );
 
     Set<ConstraintViolation<Student>> violations = validator.validate(student);
 
@@ -167,9 +171,9 @@ class StudentControllerTest {
   }
 
   @Test
-  void 受講生詳細の受講生でIDに数字以外を用いたときに入力チェックに掛かること(){
+  void 受講生詳細の受講生でIDに数字以外を用いたときに入力チェックに掛かること() {
     Student student = new Student();
-    student.setStudentID("テストです。");
+    student.setStudentId("テストです。");
     student.setName("山田太郎");
     student.setKanaName("ヤマダタロウ");
     student.setNickName("タロウ");
@@ -200,33 +204,34 @@ class StudentControllerTest {
   }
 
   @Test
-  void 受講生登録時にコース情報のコースIDが10桁以外のとき入力チェックに掛かること() throws Exception {
+  void 受講生登録時にコース情報のコースIDが10桁以外のとき入力チェックに掛かること()
+      throws Exception {
     StudentDetail response = new StudentDetail();
     when(service.registerStudentWthCourse(any(), any()))
         .thenReturn(response);
 
     String json = """
-        {
-          "student":{
-          "studentID" :"st00000001",
-          "name" : "山田太郎"
-          },
-          "studentCourseList":[
             {
-            "studentID" :"st00000001",
-            "courseID": "co000001",
-            "courseName":"java基礎コース"
+              "student":{
+              "studentID" :"st00000001",
+              "name" : "山田太郎"
+              },
+              "studentCourseList":[
+                {
+                "studentID" :"st00000001",
+                "courseID": "co000001",
+                "courseName":"java基礎コース"
+                }
+              ]
             }
-          ]
-        }
-    """;
+        """;
 
     mockMvc.perform(
-        post("/registerStudent")
-            .contentType("application/json")
-            .content(json)
+            post("/registerStudent")
+                .contentType("application/json")
+                .content(json)
         )
         .andExpect(status().isBadRequest());
-    verify(service,times(0)).registerStudentWthCourse(any(), any());
+    verify(service, times(0)).registerStudentWthCourse(any(), any());
   }
 }
