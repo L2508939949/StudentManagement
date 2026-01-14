@@ -1,6 +1,6 @@
 package raisetech.StudentManagement.controller;
 
-public class ExceptionHandling extends  RuntimeException{
+public class ExceptionHandling extends RuntimeException {
 
   /**
    * ここでエラーが発生した際、エラーの内容を設定します。
