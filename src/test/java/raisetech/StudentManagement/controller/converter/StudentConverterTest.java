@@ -24,7 +24,7 @@ class StudentConverterTest {
 
 
   @Test
-  void 受講生のリストと受講生コース情報の知ストを渡して受講生詳細リストが作成できること() {
+  void 受講生のリストと受講生コース情報を渡して受講生詳細リストが作成できること() {
 
     Student student = new Student(
         "st00000001",
