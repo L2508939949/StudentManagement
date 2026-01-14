@@ -48,7 +48,7 @@
   </select>
 
   <!--受講生のコースの申し込み状況の全件検索-->
-  <select id="CourseApplcation" resultMap="StudentCourseResultMap">
+  <select id="CourseApplication" resultMap="StudentCourseResultMap">
     SELECT course_id, student_id, course_name, course_st_day, course_ed_day
     FROM students_courses
   </select>
@@ -59,6 +59,7 @@
     SELECT application_id, course_id, status
     FROM course_applications
   </select>
+
 
   <!--コースの申込状況の検索-->
   <select id="findCourseApplicationByCourseId" resultMap="CourseApplicationResultMap">
@@ -84,16 +85,9 @@
 
 
   <!--受講生IDに紐づく受講生コース情報を新規登録します。-->
-  <insert id="insertCourseApplcation">
-    INSERT INTO course_applications (application_id, student_id, course_id,status)
-    VALUES (#{applicationId}, #{studentId}, #{courseId}, #{status})
-  </insert>
-
-
-  <!--受講生コースに紐づく申込状況の情報を新規登録します。-->
   <insert id="insertCourseApplication">
-    INSERT INTO course_applications (application_id, course_id, status)
-    VALUES (#{applicationId}, #{courseId}, #{status})
+    INSERT INTO course_applications (application_id, course_id,status)
+    VALUES (#{applicationId},#{courseId}, #{status})
   </insert>
 
 
@@ -124,12 +118,6 @@
     student_id = #{studentId}
   </update>
 
-
-  <!--受講生IDに紐づく受講生コース情報を新規登録します。-->
-  <insert id="insertCourseApplcation">
-    INSERT INTO course_applications (application_id, student_id, course_id,status)
-    VALUES (#{applicationId}, #{studentId}, #{courseId}, #{status})
-  </insert>
 
   <!--受講生IDに紐づく受講生コース情報を更新します。-->
   <update id="updateCourseApplicationStatus">

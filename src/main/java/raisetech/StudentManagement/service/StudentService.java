@@ -2,6 +2,8 @@ package raisetech.StudentManagement.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +37,29 @@ public class StudentService {
   public List<StudentDetail> searchStudentList() {
     List<Student> studentList = repository.search();
     List<StudentCourse> studentCourseList = repository.searchStudentCourseList();
-    return converter.convertStudentDetails(studentList, studentCourseList);
+
+    List<CourseApplication> applicationList = repository.searchCourseApplicationList();
+
+    List<StudentDetail> details = converter.convertStudentDetails(studentList, studentCourseList);
+
+    Map<String, List<CourseApplication>> appMap =
+        applicationList.stream()
+            .collect(Collectors.groupingBy(CourseApplication::getCourseId));
+
+    for (StudentDetail detail : details) {
+      List<CourseApplication> matched = new ArrayList<>();
+
+      for (StudentCourse course : detail.getStudentCourseList()) {
+        List<CourseApplication> apps = appMap.get(course.getCourseId());
+        if (apps != null) {
+          matched.addAll(apps);
+        }
+      }
+
+      detail.setCourseApplicationList(matched);
+    }
+    return details;
+    // return converter.convertStudentDetails(studentList, studentCourseList);
   }
 
   /**
@@ -59,6 +83,16 @@ public class StudentService {
   }
 
   /**
+   * コースの申込状況の一覧検索
+   *
+   * @return コース申込状況一覧
+   */
+  public List<CourseApplication> searchCourseApplicationList() {
+    return repository.searchCourseApplicationList();
+  }
+
+
+  /**
    * 受講生詳細検索です。 IDに紐づく受講生情報を取得したあと、その受講生に紐づく受講生コースを取得して設定します。
    * <p>
    * コース情報からコースの申込状況を表示
@@ -70,22 +104,26 @@ public class StudentService {
 
     Student student = repository.findStudentById(studentId);
 
-    List<StudentCourse> studentCourse = repository.findStudentCourseByStudentId(studentId);
+    List<StudentCourse> studentCourses =
+        repository.findStudentCourseByStudentId(studentId);
 
-    List<CourseApplication> application = new ArrayList<>();
+    List<CourseApplication> applications =
+        repository.searchCourseApplicationList();
 
-    for (StudentCourse course : studentCourse) {
-      CourseApplication app = repository.findCourseApplicationByCourseId(course.getCourseId());
-      application.add(app);
+    List<CourseApplication> matched = new ArrayList<>();
+    for (StudentCourse course : studentCourses) {
+      applications.stream()
+          .filter(app -> app.getCourseId().equals(course.getCourseId()))
+          .findFirst()
+          .ifPresent(matched::add);
     }
 
     StudentDetail detail = new StudentDetail();
     detail.setStudent(student);
-    detail.setStudentCourseList(studentCourse);
-    detail.setCourseApplicationList(application);
+    detail.setStudentCourseList(studentCourses);
+    detail.setCourseApplicationList(matched);
 
     return detail;
-    //   return new StudentDetail(student, studentCourse);
   }
 
 
@@ -119,6 +157,18 @@ public class StudentService {
     );
   }
 
+  @Transactional
+  public void updateCourseApplication(List<CourseApplication> applications) {
+
+    for (CourseApplication app : applications) {
+      repository.updateCourseApplicationStatus(
+          app.getCourseId(),
+          app.getStatus()
+      );
+    }
+  }
+
+
   /**
    * 受講生詳細の登録を行います。 受講生の情報と受講生のコース情報を個別に登録し、熟考性コース情報には、受講生IDに紐づける値とコースの開始日と終了日受を設定します。
    *
@@ -143,11 +193,8 @@ public class StudentService {
 
 
   @Transactional
-  public StudentDetail registerStudentWithCourseAndApplication(
-      Student student,
-      StudentCourse course,
-      CourseApplication application) {
-
+  public StudentDetail registerStudentWithCourseAndApplication(Student student,
+      StudentCourse course, CourseApplication application) {
     repository.insertStudent(student);
 
     course.setStudentId(student.getStudentId());

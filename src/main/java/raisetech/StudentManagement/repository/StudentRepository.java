@@ -54,7 +54,7 @@ public interface StudentRepository {
    *
    * @return 全件検索したコースの申込状況の一覧
    */
-  List<CourseApplication> searchCourseApplcationList();
+  List<CourseApplication> searchCourseApplicationList();
 
   /**
    * 指定したコースの申込状況が検索されるようにする。
@@ -65,12 +65,6 @@ public interface StudentRepository {
   CourseApplication findCourseApplicationByCourseId(String courseId);
 
   void insertCourseApplication(CourseApplication application);
-
-  void updateCourseApplicationStatus(
-      @Param("courseId") String courseId,
-      @Param("status") String status
-  );
-
 
   /**
    * 受講生を新規登録します。
@@ -107,5 +101,8 @@ public interface StudentRepository {
       String courseName, @Param("courseStartday") LocalDateTime courseStartday,
       @Param("courseEndday") LocalDateTime courseEndday);
 
-
+  void updateCourseApplicationStatus(
+      @Param("courseId") String courseId,
+      @Param("status") String status
+  );
 }
