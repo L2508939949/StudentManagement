@@ -32,29 +32,31 @@ class StudentRepositoryTest {
   @Test
   void 受講生IDで受講生の情報が取得できること() {
     Student actual = sut.findStudentById("st00000001");
-    assertThat(actual.getStudentID()).isEqualTo("st00000001");
+    assertThat(actual.getStudentId()).isEqualTo("st00000001");
   }
 
 
   @Test
   void 受講生IDに紐づく受講生コースの情報をが取得できること() {
     List<StudentCourse> actual = sut.findStudentCourseByStudentId("st00000001");
-    assertThat(actual.get(0).getStudentID()).isEqualTo("st00000001");
+    assertThat(actual.get(0).getStudentId()).isEqualTo("st00000001");
   }
 
   @Test
   void 受講生の登録が行えること() {
-    Student student = new Student();
-    student.setStudentID("st00000006");
-    student.setName("山田太郎");
-    student.setKanaName("ヤマダタロウ");
-    student.setNickName("タロウ");
-    student.setEmail("test@example.com");
-    student.setArea("大阪府");
-    student.setAge(40);
-    student.setGender("男性");
-    student.setRemark("");
-    student.setDeleted(false);
+    Student student = new Student(
+        "st00000006",
+        "山田太郎",
+        "ヤマダタロウ",
+        "タロウ",
+        "test@example.com",
+        "大阪府",
+        40,
+        "男性",
+        "",
+        false
+
+    );
 
     sut.insertStudent(student);
 
@@ -66,12 +68,17 @@ class StudentRepositoryTest {
 
   @Test
   void 受講生IDに紐づく受講生コースの登録が行えること() {
-    StudentCourse course = new StudentCourse();
-    course.setCourseID("co00000006");
-    course.setStudentID("st00000005");
-    course.setCourseName("java基礎コース");
-    course.setCourseStartday(LocalDateTime.of(2025, 12, 23, 11, 17));
-    course.setCourseEndday(LocalDateTime.of(2025, 12, 23, 11, 17));
+
+    LocalDateTime courseStartday = LocalDateTime.of(2025, 12, 23, 11, 17);
+    LocalDateTime courseEndday = LocalDateTime.of(2025, 12, 23, 11, 17);
+
+    StudentCourse course = new StudentCourse(
+        "co00000010",
+        "st00000005",
+        "java基礎コース",
+        courseStartday,
+        courseEndday
+    );
 
     sut.insertStudentCourse(course);
 
@@ -85,19 +92,28 @@ class StudentRepositoryTest {
   @Test
   void 受講生情報の更新が行えること() {
     Student student = sut.findStudentById("st00000001");
-    student.setKanaName("タロウヤマダ");
-    student.setNickName("タロウ");
+    Student expected = new Student(
+        "st00000001",
+        "山田太郎",
+        "タロウヤマダ",
+        "タロウ",
+        "test@example.com", // DBの値と一致させる
+        "大阪府",
+        40,
+        "男性",
+        "",
+        false
+    );
 
     sut.updateStudent(student);
 
     Student actual = sut.findStudentById("st00000001");
 
-    assertThat(actual.getKanaName()).isEqualTo("タロウヤマダ");
-    assertThat(actual.getNickName()).isEqualTo("タロウ");
+    assertThat(actual).isEqualTo(expected);
 
     System.out.println(
         "更新結果:" +
-            actual.getStudentID() + "," +
+            actual.getStudentId() + "," +
             actual.getKanaName() + "," +
             actual.getNickName() + "," +
             actual.getEmail() + "," +
@@ -128,7 +144,7 @@ class StudentRepositoryTest {
     List<StudentCourse> updateList = sut.findStudentCourseByStudentId(studentID);
 
     StudentCourse actual = updateList.stream()
-        .filter(c -> newCourseID.equals(c.getCourseID()))
+        .filter(c -> newCourseID.equals(c.getCourseId()))
         .findFirst()
         .orElse(null);
 
@@ -138,8 +154,8 @@ class StudentRepositoryTest {
     assertThat(actual.getCourseEndday()).isEqualTo(LocalDateTime.of(2026, 1, 31, 11, 17));
     System.out.println(
         "更新結果:" +
-            actual.getCourseID() + "," +
-            actual.getStudentID() + "," +
+            actual.getCourseId() + "," +
+            actual.getStudentId() + "," +
             actual.getCourseStartday() + "," +
             actual.getCourseEndday()
     );

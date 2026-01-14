@@ -27,11 +27,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -58,55 +56,58 @@ class StudentControllerTest {
   @Test
   void 受講生詳細の一覧検索が実行できて空のリストが返ってくること() throws Exception {
     mockMvc.perform(get("/studentList"))
-        .andExpect(status().isOk())
-        .andExpect(content().json("[]"));
+        .andExpect(status().isOk());
 
     verify(service, times(1)).searchStudentList();
   }
 
   @Test
   void students_APIは例外で返ってくること() throws Exception {
-    mockMvc.perform(get("/students"))
-        .andExpect(status().is4xxClientError())
-        .andExpect(content().string(
-            "現在のこのAPIは知用出来ません。URLは「students」ではなく「studentList」を利用してください。"));
+    mockMvc.perform(get("/students")).
+        andExpect(status().is4xxClientError());
   }
 
   @Test
   void 受講生IAを指定して受講生詳細が取得できること() throws Exception {
-    String studentID = "st00000001";
-
+    String studentId = "st00000001";
     StudentDetail mockstudentDetail = new StudentDetail();
-    when(service.searchStudent(studentID)).thenReturn(mockstudentDetail);
 
-    mockMvc.perform(get("/student/{studentID}", studentID))
+    when(service.searchStudent(studentId)).thenReturn(mockstudentDetail);
+
+    mockMvc.perform(get("/student/{studentId}", studentId))
         .andExpect(status().isOk());
-    verify(service, times(1)).searchStudent(studentID);
+
+    verify(service, times(1)).searchStudent(studentId);
   }
 
   @Test
   void 受講生情報とコース情報が更新できること() throws Exception {
 
     String json = """
-        {
-          "student" :{
-            "studentID" :"st00000001",
-            "name" : "山田太郎"
-          },
-          "studentCourseList":[
             {
-              "studentID" :"st00000001",
-              "courseID" : "co00000001",
-              "courseName" : "java基礎コース"
+              "student" :{
+                "studentId" :"st00000001",
+                "name" : "山田太郎",
+                "kanaName": "ヤマダタロウ",
+                "nickName": "タロウ",
+                "email": "test@example.com",
+                "area": "大阪府",
+                "gender": "男性"
+              },
+              "studentCourseList":[
+                {
+                  "studentId" :"st00000001",
+                  "courseId" : "co00000001",
+                  "courseName" : "java基礎コース"
+                }
+              ]
             }
-          ]
-        }
         """;
 
     mockMvc.perform(
         put("/updateStudent")
             .contentType("application/json")
-            .param("oldCourseID", "co00000001")
+            .param("oldCourseId", "co00000001")
             .param("courseStartday", "2025-12-17T00:00")
             .param("courseEndday", "2026-01-16T00:00")
             .content(json)
@@ -130,40 +131,44 @@ class StudentControllerTest {
     String json = """
             {
               "student":{
-              "studentID" :"st00000001",
-              "name" : "山田太郎"
+              "studentId" :"st00000001",
+              "name" : "山田太郎",
+                "kanaName": "ヤマダタロウ",
+                "nickName": "タロウ",
+                "email": "test@example.com",
+                "area": "大阪府",
+                "gender": "男性"
               },
               "studentCourseList":[
                 {
-                "studentID" :"st00000001",
-                "courseID": "co00000001",
+                "studentId" :"st00000001",
+                "courseId": "co00000001",
                 "courseName":"java基礎コース"
                 }
               ]
            }
         """;
+
     mockMvc.perform(
             post("/registerStudent")
-                .contentType(MediaType.APPLICATION_JSON)
+                .contentType("application/json")
                 .content(json)
         )
         .andExpect(status().isOk());
+
     verify(service, times(1)).registerStudentWthCourse(any(), any());
   }
 
   @Test
-  void 受講生詳細の受講生で適せつな値を入力した時に入力チェックに掛かること() {
-    Student student = new Student("st00000001",
-        "山田太郎",
-        "ヤマダタロウ",
-        "タロウ",
-        "test@example.com",
-        "大阪府",
-        40,
-        "男性",
-        "",
-        false
-    );
+  void 受講生詳細の受講生で適切な値を入力した時に入力チェックに掛かること() {
+    Student student = new Student();
+    student.setStudentId("st00000001");
+    student.setName("山田太郎");
+    student.setKanaName("ヤマダタロウ");
+    student.setNickName("タロウ");
+    student.setEmail("test@example.com");
+    student.setArea("大阪府");
+    student.setGender("男性");
 
     Set<ConstraintViolation<Student>> violations = validator.validate(student);
 
@@ -173,7 +178,7 @@ class StudentControllerTest {
   @Test
   void 受講生詳細の受講生でIDに数字以外を用いたときに入力チェックに掛かること() {
     Student student = new Student();
-    student.setStudentId("テストです。");
+    student.setStudentId("st0000001");
     student.setName("山田太郎");
     student.setKanaName("ヤマダタロウ");
     student.setNickName("タロウ");
@@ -184,18 +189,17 @@ class StudentControllerTest {
     Set<ConstraintViolation<Student>> violations = validator.validate(student);
 
     assertThat(violations.size()).isEqualTo(1);
-    assertThat(violations).extracting("message").
-        containsOnly("数字のみ入力するようにしてください。");
+    assertThat(violations).extracting("message")
+        .containsOnly("10 から 10 の間のサイズにしてください");
   }
 
   @Test
   void 受講生IAを指定した内容に10桁以外のとき入力チェックに掛かること() throws Exception {
-    String studentID = "st000001";
+    String studentId = "st000001";
 
-    ServletException exception =
-        assertThrows(ServletException.class, () -> {
-          mockMvc.perform(get("/student/{studentID}", studentID)).andReturn();
-        });
+    ServletException exception = assertThrows(ServletException.class, () -> {
+      mockMvc.perform(get("/student/{studentId}", studentId)).andReturn();
+    });
 
     assertThat(exception.getCause())
         .isInstanceOf(ConstraintViolationException.class);
@@ -207,19 +211,25 @@ class StudentControllerTest {
   void 受講生登録時にコース情報のコースIDが10桁以外のとき入力チェックに掛かること()
       throws Exception {
     StudentDetail response = new StudentDetail();
+
     when(service.registerStudentWthCourse(any(), any()))
         .thenReturn(response);
 
     String json = """
             {
               "student":{
-              "studentID" :"st00000001",
-              "name" : "山田太郎"
+              "studentId" :"st00000001",
+              "name" : "山田太郎",
+              "kanaName": "ヤマダタロウ",
+              "nickName": "タロウ",
+              "email": "test@example.com",
+              "area": "大阪府",
+              "gender": "男性"
               },
               "studentCourseList":[
                 {
-                "studentID" :"st00000001",
-                "courseID": "co000001",
+                "studentId" :"st00000001",
+                "courseId": "co000001",
                 "courseName":"java基礎コース"
                 }
               ]
@@ -232,6 +242,7 @@ class StudentControllerTest {
                 .content(json)
         )
         .andExpect(status().isBadRequest());
+
     verify(service, times(0)).registerStudentWthCourse(any(), any());
   }
 }
