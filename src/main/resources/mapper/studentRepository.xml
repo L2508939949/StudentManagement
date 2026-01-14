@@ -8,7 +8,6 @@
     SELECT *
     FROM students
   </select>
-
   <!--StudentCourse用のResultMap -->
   <resultMap id="StudentCourseResultMap" type="raisetech.StudentManagement.data.StudentCourse">
     <result column="course_id" property="courseId"/>
