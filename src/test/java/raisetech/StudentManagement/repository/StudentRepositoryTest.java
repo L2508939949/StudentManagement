@@ -94,15 +94,24 @@ class StudentRepositoryTest {
   @Test
   void 受講生情報の更新が行えること() {
     Student student = sut.findStudentById("st00000001");
-    student.setKanaName("タロウヤマダ");
-    student.setNickName("タロウ");
+    Student expected = new Student(
+        "st00000001",
+        "山田太郎",
+        "タロウヤマダ",
+        "タロウ",
+        "test@example.com", // DBの値と一致させる
+        "大阪府",
+        40,
+        "男性",
+        "",
+        false
+    );
 
     sut.updateStudent(student);
 
     Student actual = sut.findStudentById("st00000001");
 
-    assertThat(actual.getKanaName()).isEqualTo("タロウヤマダ");
-    assertThat(actual.getNickName()).isEqualTo("タロウ");
+    assertThat(actual).isEqualTo(expected);
 
     System.out.println(
         "更新結果:" +
