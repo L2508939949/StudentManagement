@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import raisetech.StudentManagement.data.CourseApplication;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 
@@ -30,6 +31,7 @@ public interface StudentRepository {
    */
   List<StudentCourse> searchStudentCourseList();
 
+
   /**
    * 受講生の検索を行います。
    *
@@ -45,6 +47,24 @@ public interface StudentRepository {
    * @return 受講生IDに紐づく受講生コース情報
    */
   List<StudentCourse> findStudentCourseByStudentId(String studentId);
+
+
+  /**
+   * コースの申込状況の全件検索
+   *
+   * @return 全件検索したコースの申込状況の一覧
+   */
+  List<CourseApplication> searchCourseApplicationList();
+
+  /**
+   * 指定したコースの申込状況が検索されるようにする。
+   *
+   * @param courseId
+   * @return
+   */
+  CourseApplication findCourseApplicationByCourseId(String courseId);
+
+  void insertCourseApplication(CourseApplication application);
 
   /**
    * 受講生を新規登録します。
@@ -81,4 +101,8 @@ public interface StudentRepository {
       String courseName, @Param("courseStartday") LocalDateTime courseStartday,
       @Param("courseEndday") LocalDateTime courseEndday);
 
+  void updateCourseApplicationStatus(
+      @Param("courseId") String courseId,
+      @Param("status") String status
+  );
 }

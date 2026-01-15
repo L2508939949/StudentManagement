@@ -17,6 +17,15 @@
     <result column="course_ed_day" property="courseEndday" javaType="java.time.LocalDateTime"/>
   </resultMap>
 
+  <!--CourseApplicationのResultMap-->
+  <resultMap id="CourseApplicationResultMap"
+    type="raisetech.StudentManagement.data.CourseApplication">
+    <id column="application_id" property="applicationId"/>
+    <result column="course_id" property="courseId"/>
+    <result column="status" property="status"/>
+  </resultMap>
+
+
   <!-- 受講生の全件検索 -->
   <select id="searchStudentCourseList" resultMap="StudentCourseResultMap">
     SELECT course_id, student_id, course_name, course_st_day, course_ed_day
@@ -37,6 +46,28 @@
     WHERE student_id = #{studentId}
   </select>
 
+  <!--受講生のコースの申し込み状況の全件検索-->
+  <select id="CourseApplication" resultMap="StudentCourseResultMap">
+    SELECT course_id, student_id, course_name, course_st_day, course_ed_day
+    FROM students_courses
+  </select>
+
+
+  <!--コースの申込状況の全件検索-->
+  <select id="searchCourseApplicationList" resultMap="CourseApplicationResultMap">
+    SELECT application_id, course_id, status
+    FROM course_applications
+  </select>
+
+
+  <!--コースの申込状況の検索-->
+  <select id="findCourseApplicationByCourseId" resultMap="CourseApplicationResultMap">
+    SELECT application_id, course_id, status
+    FROM course_applications
+    WHERE course_id = #{courseId}
+  </select>
+
+
   <!--受講生を新規登録します。-->
   <insert id="insertStudent">
     INSERT INTO students (student_id, name, kana_name, nickname, email, area, age, gender, remark,
@@ -50,6 +81,14 @@
     INSERT INTO students_courses (course_id, student_id, course_name, course_st_day, course_ed_day)
     VALUES (#{courseId}, #{studentId}, #{courseName}, #{courseStartday}, #{courseEndday})
   </insert>
+
+
+  <!--受講生IDに紐づく受講生コース情報を新規登録します。-->
+  <insert id="insertCourseApplication">
+    INSERT INTO course_applications (application_id, course_id,status)
+    VALUES (#{applicationId},#{courseId}, #{status})
+  </insert>
+
 
   <!--受講生を更新します。-->
   <update id="updateStudent">
@@ -76,6 +115,14 @@
     course_ed_day = #{courseEndday}
     WHERE course_id = #{oldCourseId} AND
     student_id = #{studentId}
+  </update>
+
+
+  <!--受講生IDに紐づく受講生コース情報を更新します。-->
+  <update id="updateCourseApplicationStatus">
+    UPDATE course_applications
+    SET status = #{status}
+    WHERE course_id = #{courseId}
   </update>
 
 </mapper>

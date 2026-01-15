@@ -2,10 +2,13 @@ package raisetech.StudentManagement.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import raisetech.StudentManagement.controller.converter.StudentConverter;
+import raisetech.StudentManagement.data.CourseApplication;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.StudentDetail;
@@ -34,7 +37,29 @@ public class StudentService {
   public List<StudentDetail> searchStudentList() {
     List<Student> studentList = repository.search();
     List<StudentCourse> studentCourseList = repository.searchStudentCourseList();
-    return converter.convertStudentDetails(studentList, studentCourseList);
+
+    List<CourseApplication> applicationList = repository.searchCourseApplicationList();
+
+    List<StudentDetail> details = converter.convertStudentDetails(studentList, studentCourseList);
+
+    Map<String, List<CourseApplication>> appMap =
+        applicationList.stream()
+            .collect(Collectors.groupingBy(CourseApplication::getCourseId));
+
+    for (StudentDetail detail : details) {
+      List<CourseApplication> matched = new ArrayList<>();
+
+      for (StudentCourse course : detail.getStudentCourseList()) {
+        List<CourseApplication> apps = appMap.get(course.getCourseId());
+        if (apps != null) {
+          matched.addAll(apps);
+        }
+      }
+
+      detail.setCourseApplicationList(matched);
+    }
+    return details;
+    // return converter.convertStudentDetails(studentList, studentCourseList);
   }
 
   /**
@@ -58,16 +83,49 @@ public class StudentService {
   }
 
   /**
+   * コースの申込状況の一覧検索
+   *
+   * @return コース申込状況一覧
+   */
+  public List<CourseApplication> searchCourseApplicationList() {
+    return repository.searchCourseApplicationList();
+  }
+
+
+  /**
    * 受講生詳細検索です。 IDに紐づく受講生情報を取得したあと、その受講生に紐づく受講生コースを取得して設定します。
+   * <p>
+   * コース情報からコースの申込状況を表示
    *
    * @param studentId 受講生ID
    * @return 受講生詳細
    */
   public StudentDetail searchStudent(String studentId) {
+
     Student student = repository.findStudentById(studentId);
-    List<StudentCourse> studentCourse = repository.findStudentCourseByStudentId(studentId);
-    return new StudentDetail(student, studentCourse);
+
+    List<StudentCourse> studentCourses =
+        repository.findStudentCourseByStudentId(studentId);
+
+    List<CourseApplication> applications =
+        repository.searchCourseApplicationList();
+
+    List<CourseApplication> matched = new ArrayList<>();
+    for (StudentCourse course : studentCourses) {
+      applications.stream()
+          .filter(app -> app.getCourseId().equals(course.getCourseId()))
+          .findFirst()
+          .ifPresent(matched::add);
+    }
+
+    StudentDetail detail = new StudentDetail();
+    detail.setStudent(student);
+    detail.setStudentCourseList(studentCourses);
+    detail.setCourseApplicationList(matched);
+
+    return detail;
   }
+
 
   /**
    * 受講生詳細の更新を行います。 受講生と受講生コース情報をそれぞれ更新します。
@@ -99,6 +157,18 @@ public class StudentService {
     );
   }
 
+  @Transactional
+  public void updateCourseApplication(List<CourseApplication> applications) {
+
+    for (CourseApplication app : applications) {
+      repository.updateCourseApplicationStatus(
+          app.getCourseId(),
+          app.getStatus()
+      );
+    }
+  }
+
+
   /**
    * 受講生詳細の登録を行います。 受講生の情報と受講生のコース情報を個別に登録し、熟考性コース情報には、受講生IDに紐づける値とコースの開始日と終了日受を設定します。
    *
@@ -120,4 +190,26 @@ public class StudentService {
     detail.setStudentCourseList(courses);
     return detail;
   }
+
+
+  @Transactional
+  public StudentDetail registerStudentWithCourseAndApplication(Student student,
+      StudentCourse course, CourseApplication application) {
+    repository.insertStudent(student);
+
+    course.setStudentId(student.getStudentId());
+    repository.insertStudentCourse(course);
+
+    application.setCourseId(course.getCourseId());
+    repository.insertCourseApplication(application);
+
+    StudentDetail detail = new StudentDetail();
+    detail.setStudent(student);
+    detail.setStudentCourseList(List.of(course));
+    detail.setCourseApplicationList(List.of(application));
+
+    return detail;
+  }
+
+
 }

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import raisetech.StudentManagement.data.CourseApplication;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.service.StudentService;
@@ -70,6 +71,17 @@ public class StudentController {
   }
 
   /**
+   * コースの申込状況の一覧を表示します。
+   *
+   * @return
+   */
+  @Operation(summary = "コース申込状況一覧", description = "コースの申込状況を一覧で取得します。")
+  @GetMapping("/courseApplicationList")
+  public List<CourseApplication> getCourseApplicationList() {
+    return service.searchCourseApplicationList();
+  }
+
+  /**
    * 受講生情報と受講生コース情報を更新します。 キャンセルフラグの更新もここで行います。(論理削除) コースIDも変更できるようにするため、旧コースIDをWHERE条件に持たせます。
    *
    * @param studentDetail     受講生情報と受講生コース情報
@@ -101,6 +113,9 @@ public class StudentController {
 
       service.updateStudent(studentDetail.getStudent());
       service.updateCourses(studentDetail.getStudent().getStudentId(), oldCourseId, course);
+      service.updateCourseApplication(studentDetail.getCourseApplicationList()
+      );
+
     }
     return ResponseEntity.ok("更新処理が成功しました。");
   }
@@ -117,15 +132,25 @@ public class StudentController {
   public ResponseEntity<StudentDetail> registerStudent(
       @RequestBody @Valid StudentDetail studentDetail) {
     List<StudentCourse> courses = studentDetail.getStudentCourseList();
+    List<CourseApplication> apps = studentDetail.getCourseApplicationList();
+
     StudentDetail responseStudentDetail = null;
 
-    if (courses != null && !courses.isEmpty()) {
-      // 1件だけ登録
+    if (courses != null && !courses.isEmpty()
+        && apps != null && !apps.isEmpty()) {
+
+      responseStudentDetail = service.registerStudentWithCourseAndApplication(
+          studentDetail.getStudent(),
+          courses.get(0),
+          apps.get(0)
+      );
+    } else {
       responseStudentDetail = service.registerStudentWthCourse(
           studentDetail.getStudent(),
           courses.get(0)
       );
     }
+
     return ResponseEntity.ok(responseStudentDetail);
   }
 
